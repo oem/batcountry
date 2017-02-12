@@ -49,7 +49,7 @@ func batteryLevel() (int, error) {
 
 func extractLevel(output []byte) (int, error) {
 	var level int
-	rp, err := regexp.Compile("(\\d+?)%")
+	rp, err := regexp.Compile("(?s)Battery 1:.*?(\\d+?)%")
 	if err != nil {
 		return level, err
 	}
