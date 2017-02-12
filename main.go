@@ -1,13 +1,18 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"os/exec"
-	"regexp"
-	"strconv"
+
+	"github.com/oem/batcountry/battery"
+	"github.com/oem/batcountry/notification"
 )
 
+var l = flag.Int("l", 20, "the min battery level when notifications start being send")
+
 func main() {
+	flag.Parse()
+
 	err := notifyCritical()
 	if err != nil {
 		log.Fatalln(err)
@@ -15,14 +20,15 @@ func main() {
 }
 
 func notifyCritical() error {
-	level, err := batteryLevel()
+	level, err := battery.Level()
 	if err != nil {
 		return err
 	}
 
 	if critical(level) {
-		err = notify(outputText(level), "critical")
-		log.Print(outputText(level))
+		text := notification.OutputText(level)
+		err = notification.Send(text, "critical")
+		log.Println(text)
 		if err != nil {
 			return err
 		}
@@ -30,39 +36,6 @@ func notifyCritical() error {
 	return err
 }
 
-func notify(message string, level string) error {
-	cmd := exec.Command("/usr/bin/notify-send", message, "-u", level)
-	return cmd.Run()
-}
-
-func batteryLevel() (int, error) {
-	var level int
-	cmd := exec.Command("acpi")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return level, err
-	}
-
-	level, err = extractLevel(output)
-	return level, err
-}
-
-func extractLevel(output []byte) (int, error) {
-	var level int
-	rp, err := regexp.Compile("(?s)Battery 1:.*?(\\d+?)%")
-	if err != nil {
-		return level, err
-	}
-
-	bat := rp.FindSubmatch(output)[1]
-	level, err = strconv.Atoi(string(bat))
-	return level, err
-}
-
-func outputText(level int) string {
-	return "Battery low! <b>" + strconv.Itoa(level) + "</b>%"
-}
-
 func critical(level int) bool {
-	return level <= 20
+	return level <= *l
 }
