@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-// Level shells out to acpi to get the battery level
-func Level() (int, error) {
+// AcpiLevel shells out to acpi to get the battery level
+func AcpiLevel() (int, error) {
 	var level int
 	cmd := exec.Command("acpi")
 	output, err := cmd.CombinedOutput()

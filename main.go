@@ -20,7 +20,7 @@ func main() {
 }
 
 func notifyCritical() error {
-	level, err := battery.Level()
+	level, err := battery.AcpiLevel()
 	if err != nil {
 		return err
 	}
