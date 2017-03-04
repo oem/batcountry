@@ -15,11 +15,11 @@ func AcpiLevel() (int, error) {
 		return level, err
 	}
 
-	level, err = extractLevel(output)
+	level, err = extractAcpiLevel(output)
 	return level, err
 }
 
-func extractLevel(output []byte) (int, error) {
+func extractAcpiLevel(output []byte) (int, error) {
 	var level int
 	rp, err := regexp.Compile("(?s)Battery 1:.*?(\\d+?)%")
 	if err != nil {
