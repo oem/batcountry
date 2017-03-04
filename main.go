@@ -9,6 +9,8 @@ import (
 )
 
 var l = flag.Int("l", 20, "the min battery level when notifications start being send")
+var capFile = flag.String("c", "/sys/class/power_supply/BAT1/capacity", "the file containing the current battery capacity")
+var statusFile = flag.String("s", "/sys/class/power_supply/BAT1/status", "the file containing the current battery status")
 
 func main() {
 	flag.Parse()
@@ -20,12 +22,12 @@ func main() {
 }
 
 func notifyCritical() error {
-	level, err := battery.AcpiLevel()
+	level, charging, err := battery.Level(*capFile, *statusFile)
 	if err != nil {
 		return err
 	}
 
-	if critical(level) {
+	if !charging && critical(level) {
 		text := notification.OutputText(level)
 		err = notification.Send(text, "critical")
 		log.Println(text)

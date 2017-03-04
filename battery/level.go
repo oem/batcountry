@@ -1,10 +1,14 @@
 package battery
 
-import "io/ioutil"
+import (
+	"io/ioutil"
+	"strconv"
+	"strings"
+)
 
 // Level reads the files written by the kernel to get status and capacity of the battery
-func Level(capFile, statusFile string) (string, bool, error) {
-	battery := ""
+func Level(capFile, statusFile string) (int, bool, error) {
+	battery := 0
 	charging := false
 	cap, err := ioutil.ReadFile(capFile)
 	if err != nil {
@@ -14,14 +18,16 @@ func Level(capFile, statusFile string) (string, bool, error) {
 	if err != nil {
 		return battery, charging, err
 	}
-	battery, charging = extractLevel(cap, status)
+	battery, charging, err = extractLevel(cap, status)
 	return battery, charging, err
 }
 
-func extractLevel(cap, status []byte) (string, bool) {
+func extractLevel(cap, status []byte) (int, bool, error) {
 	charging := false
-	if string(status) == "Charging" {
+	if strings.TrimSpace(string(status)) == "Charging" {
 		charging = true
 	}
-	return string(cap), charging
+
+	level, err := strconv.Atoi(strings.TrimSpace(string(cap)))
+	return level, charging, err
 }
