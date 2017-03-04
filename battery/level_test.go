@@ -1,6 +1,9 @@
 package battery
 
-import "testing"
+import (
+	"log"
+	"testing"
+)
 
 const (
 	cap    = "/sys/class/power_supply/BAT1/capacity"
@@ -9,6 +12,10 @@ const (
 
 func BenchmarkLevel(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		Level(cap, status)
+		_, _, err := Level(cap, status)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 }
